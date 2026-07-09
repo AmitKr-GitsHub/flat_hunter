@@ -31,6 +31,10 @@ GET https://api.socialapis.io/facebook/groups/posts?link=<group_url>&limit=<SOCI
 ```
 
 The implementation caps `SOCIALAPIS_LIMIT` at 9 because the live provider currently rejects higher values for this endpoint; the original requested `limit=20` now returns an input validation error. The safe interval is `ceil(31 days * 24 hours * 60 minutes / 200) = 224 minutes`, rounded up and enforced as at least 220 minutes. The UI shows calls used, remaining calls, and the safe interval. When calls reach 200, ingestion circuit-breaks. Manual fetches also enter a cooldown equal to the safe interval to prevent accidentally spending the monthly budget.
+GET https://api.socialapis.io/facebook/groups/posts?link=<group_url>&limit=20
+```
+
+The safe interval is `ceil(31 days * 24 hours * 60 minutes / 200) = 224 minutes`, rounded up and enforced as at least 220 minutes. The UI shows calls used, remaining calls, and the safe interval. When calls reach 200, ingestion circuit-breaks. Manual fetches also enter a cooldown equal to the safe interval to prevent accidentally spending the monthly budget.
 
 ## Filtering and classification
 
