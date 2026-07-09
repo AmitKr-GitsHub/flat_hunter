@@ -27,6 +27,10 @@ See `.env.example` for all supported variables:
 SocialAPIs is capped at 200 calls per calendar month. Flat Hunter records each attempted SocialAPIs request in `api_usage` before calling:
 
 ```text
+GET https://api.socialapis.io/facebook/groups/posts?link=<group_url>&limit=<SOCIALAPIS_LIMIT>
+```
+
+The implementation caps `SOCIALAPIS_LIMIT` at 9 because the live provider currently rejects higher values for this endpoint; the original requested `limit=20` now returns an input validation error. The safe interval is `ceil(31 days * 24 hours * 60 minutes / 200) = 224 minutes`, rounded up and enforced as at least 220 minutes. The UI shows calls used, remaining calls, and the safe interval. When calls reach 200, ingestion circuit-breaks. Manual fetches also enter a cooldown equal to the safe interval to prevent accidentally spending the monthly budget.
 GET https://api.socialapis.io/facebook/groups/posts?link=<group_url>&limit=20
 ```
 
@@ -93,3 +97,13 @@ Use Certbot or your provider's TLS tooling to add HTTPS.
 - SocialAPIs response shapes can vary; the ingestion code accepts common `data`/`posts` arrays and common post fields.
 - Filtering is heuristic, not a legal/financial guarantee.
 - Scheduler intervals are safe for the 200-call budget but are not a replacement for monitoring your SocialAPIs account usage.
+
+## Checking configuration safely
+
+Run the configuration check before starting ingestion:
+
+```bash
+npm run check:config
+```
+
+The command verifies that `SOCIALAPIS_TOKEN` is present and shaped like the expected token, and that `FACEBOOK_GROUP_URL` looks like a Facebook group URL. It intentionally does **not** call SocialAPIs, so it does not consume the 200-call monthly budget. If a token has been shared in chat, logs, or a ticket, rotate it in the SocialAPIs dashboard and update `.env`.

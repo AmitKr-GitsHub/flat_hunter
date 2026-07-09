@@ -8,6 +8,8 @@
   },
   "scripts": {
     "start": "node src/server.js",
+    "build": "node scripts/init-db.js",
+    "check:config": "node scripts/check-config.js"
     "build": "node scripts/init-db.js"
   },
   "dependencies": {
